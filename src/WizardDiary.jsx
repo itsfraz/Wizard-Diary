@@ -46,29 +46,61 @@ const TypingText = ({ text, onComplete }) => {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.04, delayChildren: 0.2 },
+      transition: { staggerChildren: 0.05, delayChildren: 0.2 },
     },
   };
 
   const child = {
-    visible: { opacity: 1, y: 0, filter: "blur(0px)" },
-    hidden: { opacity: 0, y: 2, filter: "blur(2px)" },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      filter: "blur(0.3px)",
+      color: "#1a1c29"
+    },
+    hidden: { 
+      opacity: 0, 
+      y: 2, 
+      filter: "blur(8px)",
+      color: "#4a3219" // slightly brownish/watery ink color before drying
+    },
   };
 
   return (
-    <motion.div
-      variants={container}
-      initial="hidden"
-      animate="visible"
-      onAnimationComplete={onComplete}
-      className="text-xl md:text-2xl lg:text-3xl font-handwriting leading-relaxed text-[#1a1c29] whitespace-pre-wrap w-full"
-    >
-      {characters.map((char, index) => (
-        <motion.span variants={child} key={index} className="inline-block">
-          {char === ' ' ? '\u00A0' : char}
-        </motion.span>
-      ))}
-    </motion.div>
+    <>
+      {/* Ink Bleed SVG Filter */}
+      <svg width="0" height="0" className="absolute pointer-events-none">
+        <filter id="wet-ink">
+          <feTurbulence type="fractalNoise" baseFrequency="0.15" numOctaves="3" result="noise" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G" result="displaced" />
+          <feColorMatrix in="displaced" type="matrix" values="
+            1 0 0 0 0
+            0 1 0 0 0
+            0 0 1 0 0
+            0 0 0 3 -0.5
+          " />
+        </filter>
+      </svg>
+      
+      <motion.div
+        variants={container}
+        initial="hidden"
+        animate="visible"
+        onAnimationComplete={onComplete}
+        className="text-xl md:text-2xl lg:text-3xl font-handwriting leading-relaxed whitespace-pre-wrap w-full"
+        style={{ filter: "url(#wet-ink)" }}
+      >
+        {characters.map((char, index) => (
+          <motion.span 
+            variants={child} 
+            key={index} 
+            className="inline-block"
+            transition={{ duration: 0.8, ease: "easeOut" }} // Slower fade for ink to dry
+          >
+            {char === ' ' ? '\u00A0' : char}
+          </motion.span>
+        ))}
+      </motion.div>
+    </>
   );
 };
 
