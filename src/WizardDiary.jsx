@@ -358,23 +358,7 @@ export default function WizardDiary() {
         <div className={`md:hidden absolute left-0 right-0 top-1/2 h-16 -mt-8 bg-gradient-to-b from-transparent via-[#5c3a21]/40 to-transparent pointer-events-none z-10 mix-blend-multiply transition-opacity duration-1000 ${isClosed ? 'opacity-0' : 'opacity-100'}`} />
         <div className={`md:hidden absolute left-0 right-0 top-1/2 h-[2px] bg-[#3e2723]/30 pointer-events-none z-10 transition-opacity duration-1000 ${isClosed ? 'opacity-0' : 'opacity-100'}`} />
 
-        {/* Top-Right Clear Button */}
-        <AnimatePresence>
-          {appState === 'DONE' && isOpen && (
-            <motion.button
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 0.5, scale: 1 }}
-              whileHover={{ opacity: 1, scale: 1.1 }}
-              onClick={handleClear}
-              className="absolute top-6 right-6 z-30 p-2 text-stone-700 hover:text-amber-900 transition-colors rounded-full bg-[#eaddc5]/50 backdrop-blur-sm"
-              title="Clear Pages"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-              </svg>
-            </motion.button>
-          )}
-        </AnimatePresence>
+        {/* Top-Right Clear Button Removed */}
 
         {/* Left Page (Top on Mobile): AI Response Canvas */}
         <div className={`w-full h-1/2 md:w-1/2 md:h-full relative p-6 sm:p-10 md:p-14 lg:p-20 flex flex-col justify-center overflow-hidden transition-opacity duration-1000 delay-300 ${isClosed ? 'opacity-0' : 'opacity-100'}`}>
