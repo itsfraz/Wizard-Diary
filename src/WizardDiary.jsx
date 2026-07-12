@@ -67,16 +67,15 @@ const TypingText = ({ text, onComplete }) => {
 
   return (
     <>
-      {/* Ink Bleed SVG Filter */}
+      {/* Ink Bleed SVG Filter - Highly Optimized for Mobile */}
       <svg width="0" height="0" className="absolute pointer-events-none">
         <filter id="wet-ink">
-          <feTurbulence type="fractalNoise" baseFrequency="0.15" numOctaves="3" result="noise" />
-          <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G" result="displaced" />
-          <feColorMatrix in="displaced" type="matrix" values="
+          <feGaussianBlur in="SourceGraphic" stdDeviation="0.5" result="blur" />
+          <feColorMatrix in="blur" type="matrix" values="
             1 0 0 0 0
             0 1 0 0 0
             0 0 1 0 0
-            0 0 0 3 -0.5
+            0 0 0 4 -1
           " />
         </filter>
       </svg>
@@ -384,9 +383,9 @@ export default function WizardDiary() {
             {appState === 'THINKING' && isOpen && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: [0, 0.3, 0], scale: [0.8, 1.1, 0.8] }}
+                animate={{ opacity: [0, 0.5, 0], scale: [0.8, 1.1, 0.8] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute inset-0 bg-amber-400 mix-blend-overlay rounded-xl blur-[60px] pointer-events-none z-0"
+                className="absolute inset-[-50%] bg-[radial-gradient(ellipse_at_center,_#fbbf24_0%,_transparent_50%)] mix-blend-overlay pointer-events-none z-0"
               />
             )}
           </AnimatePresence>
