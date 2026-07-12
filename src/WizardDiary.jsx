@@ -61,7 +61,7 @@ const TypingText = ({ text, onComplete }) => {
       initial="hidden"
       animate="visible"
       onAnimationComplete={onComplete}
-      className="text-2xl md:text-3xl lg:text-4xl font-handwriting leading-relaxed text-[#1a1c29] whitespace-pre-wrap"
+      className="text-xl md:text-2xl lg:text-3xl font-handwriting leading-relaxed text-[#1a1c29] whitespace-pre-wrap w-full"
     >
       {characters.map((char, index) => (
         <motion.span variants={child} key={index} className="inline-block">
@@ -145,37 +145,49 @@ export default function WizardDiary() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-neutral-900 flex items-center justify-center p-4 md:p-8 selection:bg-amber-900/30">
+    <div className="min-h-screen w-full bg-neutral-950 flex items-center justify-center p-2 sm:p-4 md:p-8 selection:bg-amber-900/30 overflow-hidden relative">
       <style>{`
         @import url('${fontUrl}');
         .font-handwriting { font-family: 'Caveat', cursive; }
         .font-tome { font-family: 'Cinzel', serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(92, 58, 33, 0.2); border-radius: 4px; }
       `}</style>
 
-      {/* Book Container */}
-      <div
-        className="relative w-full max-w-6xl aspect-[3/4] md:aspect-[16/10] rounded-lg shadow-2xl overflow-hidden flex flex-col md:flex-row transition-all duration-700 ease-in-out"
+      {/* Magical ambient background glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-900/10 via-transparent to-transparent opacity-50 pointer-events-none blur-3xl"></div>
+
+      {/* Book Container with Floating Animation */}
+      <motion.div
+        animate={{ y: [0, -8, 0] }}
+        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        className="relative w-[92vw] max-w-[450px] aspect-[10/14] md:w-[90vw] md:max-w-[1000px] lg:max-w-[1200px] md:aspect-[16/10] max-h-[90vh] rounded-xl shadow-[0_0_100px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col md:flex-row z-10 mx-auto"
         style={{
-          boxShadow: "inset 0 0 80px rgba(92, 58, 33, 0.4), inset 0 0 25px rgba(58, 30, 10, 0.5), 0 30px 60px -15px rgba(0,0,0,0.9)",
+          boxShadow: "inset 0 0 100px rgba(92, 58, 33, 0.5), inset 0 0 30px rgba(58, 30, 10, 0.6), 0 40px 80px -20px rgba(0,0,0,1)",
           ...paperStyle
         }}
       >
         {/* Decorative Leather Binding Edges */}
-        <div className="absolute inset-0 border-[12px] border-[#3e2723]/10 pointer-events-none rounded-lg z-20" />
+        <div className="absolute inset-0 border-[12px] md:border-[16px] border-[#3e2723]/10 pointer-events-none rounded-xl z-20" />
 
-        {/* Spine Shadow (Visible on tablets/desktop landscape) */}
-        <div className="hidden md:block absolute top-0 bottom-0 left-1/2 w-16 -ml-8 bg-gradient-to-r from-transparent via-[#5c3a21]/30 to-transparent pointer-events-none z-10 mix-blend-multiply" />
-        <div className="hidden md:block absolute top-0 bottom-0 left-1/2 w-[2px] bg-[#3e2723]/20 pointer-events-none z-10" />
+        {/* Spine Shadow (Desktop - Vertical) */}
+        <div className="hidden md:block absolute top-0 bottom-0 left-1/2 w-16 -ml-8 bg-gradient-to-r from-transparent via-[#5c3a21]/40 to-transparent pointer-events-none z-10 mix-blend-multiply" />
+        <div className="hidden md:block absolute top-0 bottom-0 left-1/2 w-[2px] bg-[#3e2723]/30 pointer-events-none z-10" />
+
+        {/* Spine Shadow (Mobile - Horizontal) */}
+        <div className="md:hidden absolute left-0 right-0 top-1/2 h-16 -mt-8 bg-gradient-to-b from-transparent via-[#5c3a21]/40 to-transparent pointer-events-none z-10 mix-blend-multiply" />
+        <div className="md:hidden absolute left-0 right-0 top-1/2 h-[2px] bg-[#3e2723]/30 pointer-events-none z-10" />
 
         {/* Top-Right Clear Button */}
         <AnimatePresence>
           {appState === 'DONE' && (
             <motion.button
               initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 0.4, scale: 1 }}
+              animate={{ opacity: 0.5, scale: 1 }}
               whileHover={{ opacity: 1, scale: 1.1 }}
               onClick={handleClear}
-              className="absolute top-6 right-6 z-30 p-2 text-stone-700 hover:text-amber-900 transition-colors rounded-full"
+              className="absolute top-6 right-6 z-30 p-2 text-stone-700 hover:text-amber-900 transition-colors rounded-full bg-[#eaddc5]/50 backdrop-blur-sm"
               title="Clear Pages"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -185,23 +197,22 @@ export default function WizardDiary() {
           )}
         </AnimatePresence>
 
-        {/* Left Page: AI Response Canvas */}
-        <div className="flex-1 relative p-8 md:p-14 lg:p-20 border-b md:border-b-0 border-[#5c3a21]/20 flex flex-col justify-center">
-
+        {/* Left Page (Top on Mobile): AI Response Canvas */}
+        <div className="w-full h-1/2 md:w-1/2 md:h-full relative p-6 sm:p-10 md:p-14 lg:p-20 flex flex-col justify-center overflow-hidden">
           {/* Ambient Glowing Magic while thinking */}
           <AnimatePresence>
             {appState === 'THINKING' && (
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: [0, 0.15, 0] }}
-                transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute inset-0 bg-amber-400 mix-blend-overlay rounded-lg blur-3xl pointer-events-none"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: [0, 0.3, 0], scale: [0.8, 1.1, 0.8] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute inset-0 bg-amber-400 mix-blend-overlay rounded-xl blur-[60px] pointer-events-none z-0"
               />
             )}
           </AnimatePresence>
 
-          <div className="relative z-10 min-h-[50%]">
-            <AnimatePresence>
+          <div className="relative z-10 w-full max-h-full overflow-y-auto custom-scrollbar pr-2">
+            <AnimatePresence mode="wait">
               {(appState === 'TYPING' || appState === 'READING') && (
                 <motion.div
                   key="wizard-answer"
@@ -217,11 +228,10 @@ export default function WizardDiary() {
           </div>
         </div>
 
-        {/* Right Page: User Input Canvas */}
-        <div className="flex-1 relative p-8 md:p-14 lg:p-20 flex flex-col justify-center items-center">
-
+        {/* Right Page (Bottom on Mobile): User Input Canvas */}
+        <div className="w-full h-1/2 md:w-1/2 md:h-full relative p-6 sm:p-10 md:p-14 lg:p-20 flex flex-col justify-center items-center overflow-hidden">
           {/* Render User's Submitted Text */}
-          <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-8 md:px-14 lg:px-20 pointer-events-none -translate-y-16 md:-translate-y-24">
+          <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-6 sm:px-10 md:px-14 lg:px-20 pointer-events-none -translate-y-8 md:-translate-y-16">
             <AnimatePresence>
               {(appState === 'WRITTEN' || appState === 'VANISHING') && (
                 <motion.div
@@ -237,7 +247,7 @@ export default function WizardDiary() {
                       ? { duration: 2, ease: "easeOut" }
                       : { duration: 0 }
                   }
-                  className="text-4xl md:text-5xl font-handwriting leading-relaxed"
+                  className="text-2xl sm:text-3xl md:text-4xl font-handwriting leading-relaxed w-full max-h-full overflow-y-auto custom-scrollbar px-2"
                 >
                   {submittedText}
                 </motion.div>
@@ -246,7 +256,7 @@ export default function WizardDiary() {
           </div>
 
           {/* Input Area */}
-          <div className="relative z-10 w-full max-w-lg -translate-y-16 md:-translate-y-24">
+          <div className="relative z-10 w-full max-w-lg -translate-y-8 md:-translate-y-16">
             <form onSubmit={handleSubmit} className="relative group">
               <input
                 ref={inputRef}
@@ -255,11 +265,11 @@ export default function WizardDiary() {
                 onChange={(e) => setInputText(e.target.value)}
                 disabled={isInputDisabled}
                 placeholder={isInputDisabled ? "" : "Cast your inquiry into the pages..."}
-                className="w-full bg-transparent border-b border-[#5c3a21]/20 pb-2 text-2xl font-handwriting text-[#1c1917] placeholder:text-[#5c3a21]/40 focus:outline-none focus:border-[#5c3a21]/60 transition-colors disabled:opacity-0"
+                className="w-full bg-transparent border-b border-[#5c3a21]/20 pb-2 text-lg sm:text-xl md:text-2xl font-handwriting text-[#1c1917] placeholder:text-[#5c3a21]/40 focus:outline-none focus:border-[#5c3a21]/60 transition-colors disabled:opacity-0"
               />
               {!isInputDisabled && (
                 <motion.div
-                  className="absolute bottom-0 left-0 h-[1px] bg-amber-900/40"
+                  className="absolute bottom-0 left-0 h-[2px] bg-amber-900/60"
                   initial={{ width: "0%" }}
                   whileInView={{ width: "100%" }}
                   transition={{ duration: 1.5, ease: "easeOut" }}
@@ -267,9 +277,9 @@ export default function WizardDiary() {
               )}
             </form>
           </div>
-
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
+
