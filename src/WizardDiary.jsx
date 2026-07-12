@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import MagicalTextDissolve from './MagicalTextDissolve';
+import { audioManager } from './utils/AudioManager';
 
 // Replace with your actual Gemini API Key
 const API_KEY = import.meta.env.VITE_GROQ_API_KEY;
@@ -85,7 +87,7 @@ const TypingText = ({ text, onComplete }) => {
         initial="hidden"
         animate="visible"
         onAnimationComplete={onComplete}
-        className="text-xl md:text-2xl lg:text-3xl font-handwriting leading-relaxed whitespace-pre-wrap w-full"
+        className="text-base sm:text-xl md:text-2xl lg:text-3xl font-handwriting leading-relaxed whitespace-pre-wrap w-full"
         style={{ filter: "url(#wet-ink)" }}
       >
         {characters.map((char, index) => (
@@ -313,10 +315,10 @@ export default function WizardDiary() {
     backgroundBlendMode: 'normal, normal, normal, multiply, normal'
   };
 
-  const containerClasses = `relative w-[92vw] max-h-[90vh] rounded-xl shadow-[0_40px_100px_rgba(0,0,0,1)] overflow-hidden flex flex-col md:flex-row z-10 mx-auto transition-all duration-[1200ms] ease-in-out ${
+  const containerClasses = `relative w-[95vw] sm:w-[92vw] max-h-[90vh] rounded-xl shadow-[0_40px_100px_rgba(0,0,0,1)] overflow-hidden flex flex-row z-10 mx-auto transition-all duration-[1200ms] ease-in-out ${
     isClosed 
-      ? 'max-w-[450px] md:max-w-[500px] aspect-[10/14] md:aspect-[3/4]' 
-      : 'max-w-[450px] md:max-w-[1000px] lg:max-w-[1200px] aspect-[10/14] md:aspect-[16/10] md:w-[90vw]'
+      ? 'max-w-[450px] md:max-w-[500px] aspect-[3/4]' 
+      : 'max-w-[1000px] lg:max-w-[1200px] aspect-[1.3] sm:aspect-[16/10]'
   }`;
 
   return (
@@ -350,18 +352,14 @@ export default function WizardDiary() {
         {/* Decorative Leather Binding Edges (Under Cover) */}
         <div className="absolute inset-0 border-[12px] md:border-[16px] border-[#3e2723]/10 pointer-events-none rounded-xl z-20" />
 
-        {/* Spine Shadow (Desktop - Vertical) */}
-        <div className={`hidden md:block absolute top-0 bottom-0 left-1/2 w-16 -ml-8 bg-gradient-to-r from-transparent via-[#5c3a21]/40 to-transparent pointer-events-none z-10 mix-blend-multiply transition-opacity duration-1000 ${isClosed ? 'opacity-0' : 'opacity-100'}`} />
-        <div className={`hidden md:block absolute top-0 bottom-0 left-1/2 w-[2px] bg-[#3e2723]/30 pointer-events-none z-10 transition-opacity duration-1000 ${isClosed ? 'opacity-0' : 'opacity-100'}`} />
-
-        {/* Spine Shadow (Mobile - Horizontal) */}
-        <div className={`md:hidden absolute left-0 right-0 top-1/2 h-16 -mt-8 bg-gradient-to-b from-transparent via-[#5c3a21]/40 to-transparent pointer-events-none z-10 mix-blend-multiply transition-opacity duration-1000 ${isClosed ? 'opacity-0' : 'opacity-100'}`} />
-        <div className={`md:hidden absolute left-0 right-0 top-1/2 h-[2px] bg-[#3e2723]/30 pointer-events-none z-10 transition-opacity duration-1000 ${isClosed ? 'opacity-0' : 'opacity-100'}`} />
+        {/* Spine Shadow (Vertical for all screens) */}
+        <div className={`absolute top-0 bottom-0 left-1/2 w-8 sm:w-16 -ml-4 sm:-ml-8 bg-gradient-to-r from-transparent via-[#5c3a21]/40 to-transparent pointer-events-none z-10 mix-blend-multiply transition-opacity duration-1000 ${isClosed ? 'opacity-0' : 'opacity-100'}`} />
+        <div className={`absolute top-0 bottom-0 left-1/2 w-[2px] bg-[#3e2723]/30 pointer-events-none z-10 transition-opacity duration-1000 ${isClosed ? 'opacity-0' : 'opacity-100'}`} />
 
         {/* Top-Right Clear Button Removed */}
 
-        {/* Left Page (Top on Mobile): AI Response Canvas */}
-        <div className={`w-full h-1/2 md:w-1/2 md:h-full relative p-6 sm:p-10 md:p-14 lg:p-20 flex flex-col justify-center overflow-hidden transition-opacity duration-1000 delay-300 ${isClosed ? 'opacity-0' : 'opacity-100'}`}>
+        {/* Left Page: AI Response Canvas */}
+        <div className={`w-1/2 h-full relative p-3 sm:p-10 md:p-14 lg:p-20 flex flex-col justify-center overflow-hidden transition-opacity duration-1000 delay-300 ${isClosed ? 'opacity-0' : 'opacity-100'}`}>
           {/* Ambient Glowing Magic while thinking */}
           <AnimatePresence>
             {appState === 'THINKING' && isOpen && (
@@ -391,28 +389,24 @@ export default function WizardDiary() {
           </div>
         </div>
 
-        {/* Right Page (Bottom on Mobile): User Input Canvas */}
-        <div className={`w-full h-1/2 md:w-1/2 md:h-full relative p-6 sm:p-10 md:p-14 lg:p-20 flex flex-col justify-center items-center overflow-hidden transition-opacity duration-1000 delay-300 ${isClosed ? 'opacity-0' : 'opacity-100'}`}>
+        {/* Right Page: User Input Canvas */}
+        <div className={`w-1/2 h-full relative p-3 sm:p-10 md:p-14 lg:p-20 flex flex-col justify-center items-center overflow-hidden transition-opacity duration-1000 delay-300 ${isClosed ? 'opacity-0' : 'opacity-100'}`}>
           {/* Render User's Submitted Text */}
           <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-6 sm:px-10 md:px-14 lg:px-20 pointer-events-none -translate-y-8 md:-translate-y-16">
             <AnimatePresence>
               {(appState === 'WRITTEN' || appState === 'VANISHING') && isOpen && (
                 <motion.div
                   key="user-text"
-                  initial={{ filter: "blur(0px)", opacity: 1, scale: 1, color: "#1c1917" }}
-                  animate={
-                    appState === 'VANISHING'
-                      ? { filter: "blur(12px)", opacity: 0, scale: 0.95, color: "#44403c" }
-                      : { filter: "blur(0px)", opacity: 1, scale: 1, color: "#1c1917" }
-                  }
-                  transition={
-                    appState === 'VANISHING'
-                      ? { duration: 2, ease: "easeOut" }
-                      : { duration: 0 }
-                  }
-                  className="text-2xl sm:text-3xl md:text-4xl font-handwriting leading-relaxed w-full max-h-full overflow-y-auto custom-scrollbar px-2"
+                  initial={{ opacity: 1 }}
+                  exit={{ opacity: 0, transition: { duration: 0.5, delay: 1.5 } }} // Fallback exit
+                  className="w-full max-h-full flex items-center justify-center"
                 >
-                  {submittedText}
+                  <MagicalTextDissolve
+                    text={submittedText}
+                    isVanishing={appState === 'VANISHING'}
+                    onAudioTrigger={() => audioManager.playMagicChime()}
+                    className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-handwriting leading-relaxed text-[#1c1917]"
+                  />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -428,7 +422,7 @@ export default function WizardDiary() {
                 onChange={(e) => setInputText(e.target.value)}
                 disabled={isInputDisabled || !isOpen}
                 placeholder={isInputDisabled || !isOpen ? "" : "Cast your inquiry into the pages..."}
-                className="w-full bg-transparent border-b border-[#5c3a21]/20 pb-2 text-lg sm:text-xl md:text-2xl font-handwriting text-[#1c1917] placeholder:text-[#5c3a21]/40 focus:outline-none focus:border-[#5c3a21]/60 transition-colors disabled:opacity-0"
+                className="w-full bg-transparent border-b border-[#5c3a21]/20 pb-1 sm:pb-2 text-base sm:text-xl md:text-2xl font-handwriting text-[#1c1917] placeholder:text-[#5c3a21]/40 focus:outline-none focus:border-[#5c3a21]/60 transition-colors disabled:opacity-0"
               />
               {!isInputDisabled && isOpen && (
                 <motion.div
