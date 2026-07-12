@@ -158,8 +158,7 @@ const BookCover = ({ state, onClick }) => {
           transitionDelay: isOpening ? '300ms' : '0ms',
           backgroundColor: '#3e2723',
           backgroundImage: `
-            radial-gradient(circle at center, transparent 30%, rgba(0,0,0,0.8) 150%),
-            url("data:image/svg+xml,%3Csvg width='400' height='400' viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.02' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='1 0 0 0 0, 0 0.8 0 0 0, 0 0.5 0 0 0, 0 0 0 0.15 0' /%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23noise)'/%3E%3C/svg%3E")
+            radial-gradient(circle at center, transparent 30%, rgba(0,0,0,0.8) 150%)
           `,
           boxShadow: 'inset 4px 0 20px rgba(0,0,0,0.5), inset -10px 0 30px rgba(0,0,0,0.9), 10px 10px 30px rgba(0,0,0,0.8)'
         }}
@@ -230,13 +229,47 @@ const BookCover = ({ state, onClick }) => {
   );
 };
 
+// Decoupled Input Component to prevent full re-renders on keystrokes
+const DecoupledInput = ({ onSubmit, disabled, placeholder }) => {
+  const [localText, setLocalText] = useState("");
+  const inputRef = useRef(null);
+
+  const handleLocalSubmit = (e) => {
+    e.preventDefault();
+    if (!localText.trim() || disabled) return;
+    onSubmit(localText);
+    setLocalText("");
+  };
+
+  return (
+    <form onSubmit={handleLocalSubmit} className="relative group">
+      <input
+        ref={inputRef}
+        type="text"
+        value={localText}
+        onChange={(e) => setLocalText(e.target.value)}
+        disabled={disabled}
+        placeholder={placeholder}
+        className="w-full bg-transparent border-b border-[#5c3a21]/20 pb-1 sm:pb-2 text-base sm:text-xl md:text-2xl font-handwriting text-[#1c1917] placeholder:text-[#5c3a21]/40 focus:outline-none focus:border-[#5c3a21]/60 transition-colors disabled:opacity-0"
+      />
+      {!disabled && (
+        <motion.div
+          className="absolute bottom-0 left-0 h-[2px] bg-amber-900/60"
+          initial={{ width: "0%" }}
+          whileInView={{ width: "100%" }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
+        />
+      )}
+    </form>
+  );
+};
+
 export default function WizardDiary() {
   // Book States: CLOSED -> OPENING -> OPEN
   const [bookCoverState, setBookCoverState] = useState('CLOSED');
   
   // App States: IDLE -> WRITTEN -> VANISHING -> THINKING -> TYPING -> READING -> DONE
   const [appState, setAppState] = useState('IDLE');
-  const [inputText, setInputText] = useState('');
   const [submittedText, setSubmittedText] = useState('');
   const [wizardResponse, setWizardResponse] = useState('');
   const inputRef = useRef(null);
@@ -259,13 +292,11 @@ export default function WizardDiary() {
     }, 1200);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!inputText.trim() || (appState !== 'IDLE' && appState !== 'DONE')) return;
-
-    const query = inputText.trim();
-    setSubmittedText(query);
-    setInputText('');
+  const handleSubmit = async (textToSubmit) => {
+    if (!textToSubmit.trim() || (appState !== 'IDLE' && appState !== 'DONE')) return;
+    
+    const prompt = textToSubmit;
+    setSubmittedText(prompt);
     setWizardResponse(''); // Clear previous answer
     setAppState('WRITTEN');
 
@@ -279,7 +310,7 @@ export default function WizardDiary() {
     // 3. Thinking and API Fetch
     setAppState('THINKING');
     try {
-      const response = await fetchWizardResponse(query);
+      const response = await fetchWizardResponse(prompt);
       setWizardResponse(response);
     } catch (error) {
       setWizardResponse(`Connection error: ${error.message}`);
@@ -307,12 +338,9 @@ export default function WizardDiary() {
     backgroundImage: `
       radial-gradient(circle at center, transparent 30%, rgba(139, 69, 19, 0.2) 85%, rgba(92, 58, 33, 0.45) 100%),
       radial-gradient(ellipse at 20% 80%, rgba(200, 160, 120, 0.25) 0%, transparent 45%),
-      radial-gradient(ellipse at 80% 20%, rgba(180, 130, 90, 0.2) 0%, transparent 55%),
-      url("data:image/svg+xml,%3Csvg width='400' height='400' viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012' numOctaves='5' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='1 0 0 0 0, 0 0.9 0 0 0, 0 0.7 0 0 0, 0 0 0 0.12 0' /%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23noise)'/%3E%3C/svg%3E"),
-      url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='fine-noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23fine-noise)' opacity='0.08'/%3E%3C/svg%3E")
+      radial-gradient(ellipse at 80% 20%, rgba(180, 130, 90, 0.2) 0%, transparent 55%)
     `,
-    backgroundSize: '100% 100%, 100% 100%, 100% 100%, 400px 400px, 100px 100px',
-    backgroundBlendMode: 'normal, normal, normal, multiply, normal'
+    backgroundSize: '100% 100%, 100% 100%, 100% 100%'
   };
 
   const containerClasses = `relative w-[95vw] sm:w-[92vw] max-h-[90vh] rounded-xl shadow-[0_40px_100px_rgba(0,0,0,1)] overflow-hidden flex flex-row z-10 mx-auto transition-all duration-[1200ms] ease-in-out ${
@@ -414,25 +442,13 @@ export default function WizardDiary() {
 
           {/* Input Area */}
           <div className="relative z-10 w-full max-w-lg -translate-y-8 md:-translate-y-16">
-            <form onSubmit={handleSubmit} className="relative group">
-              <input
-                ref={inputRef}
-                type="text"
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                disabled={isInputDisabled || !isOpen}
-                placeholder={isInputDisabled || !isOpen ? "" : "Cast your inquiry into the pages..."}
-                className="w-full bg-transparent border-b border-[#5c3a21]/20 pb-1 sm:pb-2 text-base sm:text-xl md:text-2xl font-handwriting text-[#1c1917] placeholder:text-[#5c3a21]/40 focus:outline-none focus:border-[#5c3a21]/60 transition-colors disabled:opacity-0"
+            {isOpen && (
+              <DecoupledInput 
+                onSubmit={handleSubmit} 
+                disabled={isInputDisabled} 
+                placeholder={isInputDisabled ? "" : "Cast your inquiry into the pages..."} 
               />
-              {!isInputDisabled && isOpen && (
-                <motion.div
-                  className="absolute bottom-0 left-0 h-[2px] bg-amber-900/60"
-                  initial={{ width: "0%" }}
-                  whileInView={{ width: "100%" }}
-                  transition={{ duration: 1.5, ease: "easeOut" }}
-                />
-              )}
-            </form>
+            )}
           </div>
         </div>
       </motion.div>
