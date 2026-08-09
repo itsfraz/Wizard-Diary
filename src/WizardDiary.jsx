@@ -87,7 +87,7 @@ const TypingText = ({ text, onComplete }) => {
         initial="hidden"
         animate="visible"
         onAnimationComplete={onComplete}
-        className="text-base sm:text-xl md:text-2xl lg:text-3xl font-handwriting leading-relaxed whitespace-pre-wrap w-full"
+        className="text-3xl sm:text-4xl md:text-2xl lg:text-3xl font-handwriting leading-relaxed whitespace-pre-wrap w-full"
         style={{ filter: "url(#wet-ink)" }}
       >
         {characters.map((char, index) => (
@@ -250,7 +250,8 @@ const DecoupledInput = ({ onSubmit, disabled, placeholder }) => {
         onChange={(e) => setLocalText(e.target.value)}
         disabled={disabled}
         placeholder={placeholder}
-        className="w-full bg-transparent border-b border-[#5c3a21]/20 pb-1 sm:pb-2 text-base sm:text-xl md:text-2xl font-handwriting text-[#1c1917] placeholder:text-[#5c3a21]/40 focus:outline-none focus:border-[#5c3a21]/60 transition-colors disabled:opacity-0"
+        aria-label="Ask the Grimoire"
+        className="w-full bg-transparent border-b border-[#5c3a21]/20 pb-1 sm:pb-2 text-3xl sm:text-4xl md:text-2xl font-handwriting text-[#1c1917] placeholder:text-[#5c3a21]/40 focus:outline-none focus:border-[#5c3a21]/60 transition-colors disabled:opacity-0"
       />
       {!disabled && (
         <motion.div
@@ -277,12 +278,18 @@ export default function WizardDiary() {
   useEffect(() => {
     let timer;
     if (appState === 'READING') {
+      // Fixed 5 seconds timer after answer has finished typing
       timer = setTimeout(() => {
         setAppState('DONE');
-      }, 7000);
+      }, 5000);
+    } else if (appState === 'DONE') {
+      // Automatically vanish and go back to input after a short pause
+      timer = setTimeout(() => {
+        handleReset();
+      }, 1500);
     }
     return () => clearTimeout(timer);
-  }, [appState]);
+  }, [appState, wizardResponse]);
 
   const handleOpenBook = () => {
     if (bookCoverState !== 'CLOSED') return;
@@ -319,14 +326,13 @@ export default function WizardDiary() {
 
     // 4. Typing the response
     setAppState('TYPING');
+    audioManager.startQuill();
   };
 
-  const handleClear = () => {
+  const handleReset = () => {
     setAppState('IDLE');
     setSubmittedText('');
     setWizardResponse('');
-    setInputText('');
-    if (inputRef.current) inputRef.current.focus();
   };
 
   const isInputDisabled = appState !== 'IDLE' && appState !== 'DONE';
@@ -335,19 +341,26 @@ export default function WizardDiary() {
   const isOpen = bookCoverState === 'OPEN';
 
   const paperStyle = {
-    backgroundColor: '#eaddc5', // Aged ivory/tan base
+    backgroundColor: '#d8c3a5', // Darker, more aged ivory base
     backgroundImage: `
-      radial-gradient(circle at center, transparent 30%, rgba(139, 69, 19, 0.2) 85%, rgba(92, 58, 33, 0.45) 100%),
-      radial-gradient(ellipse at 20% 80%, rgba(200, 160, 120, 0.25) 0%, transparent 45%),
-      radial-gradient(ellipse at 80% 20%, rgba(180, 130, 90, 0.2) 0%, transparent 55%)
+      radial-gradient(ellipse at center, transparent 40%, rgba(101, 67, 33, 0.5) 90%, rgba(62, 39, 35, 0.8) 100%),
+      radial-gradient(circle at 15% 25%, rgba(92, 58, 33, 0.25) 0%, transparent 15%),
+      radial-gradient(circle at 80% 85%, rgba(101, 67, 33, 0.2) 0%, transparent 20%),
+      radial-gradient(circle at 35% 80%, rgba(92, 58, 33, 0.15) 0%, transparent 10%),
+      radial-gradient(circle at 75% 15%, rgba(62, 39, 35, 0.18) 0%, transparent 12%),
+      linear-gradient(100deg, transparent 40%, rgba(255, 255, 255, 0.15) 41%, rgba(62, 39, 35, 0.08) 42%, transparent 44%),
+      linear-gradient(135deg, transparent 30%, rgba(62, 39, 35, 0.06) 32%, transparent 34%),
+      linear-gradient(45deg, transparent 70%, rgba(62, 39, 35, 0.05) 71%, transparent 73%),
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.12'/%3E%3C/svg%3E")
     `,
-    backgroundSize: '100% 100%, 100% 100%, 100% 100%'
+    backgroundBlendMode: 'multiply, multiply, multiply, multiply, multiply, overlay, multiply, multiply, color-burn',
+    backgroundSize: '100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 200px 200px'
   };
 
   const containerClasses = `relative w-[95vw] sm:w-[92vw] max-h-[90vh] rounded-xl shadow-[0_40px_100px_rgba(0,0,0,1)] overflow-hidden flex flex-row z-10 mx-auto transition-all duration-[1200ms] ease-in-out ${
     isClosed 
       ? 'max-w-[450px] md:max-w-[500px] aspect-[3/4]' 
-      : 'max-w-[1000px] lg:max-w-[1200px] aspect-[1.3] sm:aspect-[16/10]'
+      : 'max-w-[1000px] lg:max-w-[1200px] h-[85vh] md:h-auto md:aspect-[16/10]'
   }`;
 
   return (
@@ -382,13 +395,17 @@ export default function WizardDiary() {
         <div className="absolute inset-0 border-[12px] md:border-[16px] border-[#3e2723]/10 pointer-events-none rounded-xl z-20" />
 
         {/* Spine Shadow (Vertical for all screens) */}
-        <div className={`absolute top-0 bottom-0 left-1/2 w-8 sm:w-16 -ml-4 sm:-ml-8 bg-gradient-to-r from-transparent via-[#5c3a21]/40 to-transparent pointer-events-none z-10 mix-blend-multiply transition-opacity duration-1000 ${isClosed ? 'opacity-0' : 'opacity-100'}`} />
-        <div className={`absolute top-0 bottom-0 left-1/2 w-[2px] bg-[#3e2723]/30 pointer-events-none z-10 transition-opacity duration-1000 ${isClosed ? 'opacity-0' : 'opacity-100'}`} />
-
-        {/* Top-Right Clear Button Removed */}
+        <div className={`hidden md:block absolute top-0 bottom-0 left-1/2 w-8 sm:w-16 -ml-4 sm:-ml-8 bg-gradient-to-r from-transparent via-[#5c3a21]/40 to-transparent pointer-events-none z-10 mix-blend-multiply transition-opacity duration-1000 ${isClosed ? 'opacity-0' : 'opacity-100'}`} />
+        <div className={`hidden md:block absolute top-0 bottom-0 left-1/2 w-[2px] bg-[#3e2723]/30 pointer-events-none z-10 transition-opacity duration-1000 ${isClosed ? 'opacity-0' : 'opacity-100'}`} />
 
         {/* Left Page: AI Response Canvas */}
-        <div className={`w-1/2 h-full relative p-3 sm:p-10 md:p-14 lg:p-20 flex flex-col justify-center overflow-hidden transition-opacity duration-1000 delay-300 ${isClosed ? 'opacity-0' : 'opacity-100'}`}>
+        <div className={`absolute inset-0 md:relative md:inset-auto md:w-1/2 h-full p-3 sm:p-10 md:p-14 lg:p-20 flex flex-col justify-start pt-24 md:pt-40 overflow-hidden transition-all duration-1000 delay-300 ${
+          isClosed ? 'opacity-0' : 'opacity-100'
+        } ${
+          ['IDLE', 'WRITTEN', 'VANISHING'].includes(appState) 
+            ? 'opacity-0 pointer-events-none md:opacity-100 md:pointer-events-auto' 
+            : ''
+        }`}>
           {/* Ambient Glowing Magic while thinking */}
           <AnimatePresence>
             {appState === 'THINKING' && isOpen && (
@@ -403,14 +420,17 @@ export default function WizardDiary() {
 
           <div className="relative z-10 w-full max-h-full overflow-y-auto custom-scrollbar pr-2">
             <AnimatePresence mode="wait">
-              {(appState === 'TYPING' || appState === 'READING') && isOpen && (
+              {(appState === 'TYPING' || appState === 'READING' || appState === 'DONE') && isOpen && (
                 <motion.div
                   key="wizard-answer"
                   exit={{ opacity: 0, filter: "blur(8px)", transition: { duration: 2 } }}
                 >
                   <TypingText
                     text={wizardResponse}
-                    onComplete={() => setAppState('READING')}
+                    onComplete={() => {
+                      audioManager.stopQuill();
+                      setAppState('READING');
+                    }}
                   />
                 </motion.div>
               )}
@@ -419,16 +439,22 @@ export default function WizardDiary() {
         </div>
 
         {/* Right Page: User Input Canvas */}
-        <div className={`w-1/2 h-full relative p-3 sm:p-10 md:p-14 lg:p-20 flex flex-col justify-center items-center overflow-hidden transition-opacity duration-1000 delay-300 ${isClosed ? 'opacity-0' : 'opacity-100'}`}>
+        <div className={`absolute inset-0 md:relative md:inset-auto md:w-1/2 h-full p-3 sm:p-10 md:p-14 lg:p-20 flex flex-col justify-start pt-24 md:pt-40 items-center overflow-hidden transition-all duration-1000 delay-300 ${
+          isClosed ? 'opacity-0' : 'opacity-100'
+        } ${
+          ['THINKING', 'TYPING', 'READING', 'DONE'].includes(appState) 
+            ? 'opacity-0 pointer-events-none md:opacity-100 md:pointer-events-auto' 
+            : ''
+        }`}>
           {/* Render User's Submitted Text */}
-          <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-6 sm:px-10 md:px-14 lg:px-20 pointer-events-none -translate-y-8 md:-translate-y-16">
+          <div className="absolute inset-0 flex flex-col justify-start pt-24 md:pt-40 items-center text-center px-6 sm:px-10 md:px-14 lg:px-20 pointer-events-none">
             <AnimatePresence>
               {(appState === 'WRITTEN') && isOpen && (
                 <motion.div
                   key="user-text"
                   initial={{ opacity: 1 }}
                   exit={{ opacity: 0, filter: "blur(8px)", transition: { duration: 2 } }}
-                  className="w-full max-h-full flex items-center justify-center text-lg sm:text-2xl md:text-3xl lg:text-4xl font-handwriting leading-relaxed text-[#1c1917]"
+                  className="w-full max-h-full flex items-center justify-center text-4xl sm:text-5xl md:text-3xl lg:text-4xl font-handwriting leading-relaxed text-[#1c1917]"
                 >
                   {submittedText}
                 </motion.div>
@@ -437,7 +463,7 @@ export default function WizardDiary() {
           </div>
 
           {/* Input Area */}
-          <div className="relative z-10 w-full max-w-lg -translate-y-8 md:-translate-y-16">
+          <div className="relative z-10 w-full max-w-lg">
             {isOpen && (
               <DecoupledInput 
                 onSubmit={handleSubmit} 
