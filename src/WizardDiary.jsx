@@ -305,6 +305,7 @@ export default function WizardDiary() {
 
     // 2. Vanishing animation
     setAppState('VANISHING');
+    audioManager.playMagicChime();
     await new Promise(r => setTimeout(r, 2000));
 
     // 3. Thinking and API Fetch
@@ -422,19 +423,14 @@ export default function WizardDiary() {
           {/* Render User's Submitted Text */}
           <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-6 sm:px-10 md:px-14 lg:px-20 pointer-events-none -translate-y-8 md:-translate-y-16">
             <AnimatePresence>
-              {(appState === 'WRITTEN' || appState === 'VANISHING') && isOpen && (
+              {(appState === 'WRITTEN') && isOpen && (
                 <motion.div
                   key="user-text"
                   initial={{ opacity: 1 }}
-                  exit={{ opacity: 0, transition: { duration: 0.5, delay: 1.5 } }} // Fallback exit
-                  className="w-full max-h-full flex items-center justify-center"
+                  exit={{ opacity: 0, filter: "blur(8px)", transition: { duration: 2 } }}
+                  className="w-full max-h-full flex items-center justify-center text-lg sm:text-2xl md:text-3xl lg:text-4xl font-handwriting leading-relaxed text-[#1c1917]"
                 >
-                  <MagicalTextDissolve
-                    text={submittedText}
-                    isVanishing={appState === 'VANISHING'}
-                    onAudioTrigger={() => audioManager.playMagicChime()}
-                    className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-handwriting leading-relaxed text-[#1c1917]"
-                  />
+                  {submittedText}
                 </motion.div>
               )}
             </AnimatePresence>
