@@ -243,16 +243,16 @@ const DecoupledInput = ({ onSubmit, disabled, placeholder }) => {
 
   return (
     <form onSubmit={handleLocalSubmit} className="relative group">
-      <input
-        ref={inputRef}
-        type="text"
-        value={localText}
-        onChange={(e) => setLocalText(e.target.value)}
-        disabled={disabled}
-        placeholder={placeholder}
-        aria-label="Ask the Grimoire"
-        className="w-full bg-transparent border-b border-[#5c3a21]/20 pb-1 sm:pb-2 text-3xl sm:text-4xl md:text-2xl font-handwriting text-[#1c1917] placeholder:text-[#5c3a21]/40 focus:outline-none focus:border-[#5c3a21]/60 transition-colors disabled:opacity-0"
-      />
+        <input 
+          ref={inputRef}
+          type="text"
+          value={localText}
+          onChange={(e) => setLocalText(e.target.value)}
+          disabled={disabled}
+          placeholder={placeholder}
+          aria-label="Ask the Grimoire"
+          className="w-full bg-transparent border-b border-[#5c3a21]/20 pb-1 sm:pb-2 text-3xl sm:text-4xl md:text-2xl font-handwriting text-[#1c1917] placeholder:text-[#5c3a21]/40 focus:outline-none focus:border-[#5c3a21]/60 transition-colors disabled:opacity-0 transform-gpu"
+        />
       {!disabled && (
         <motion.div
           className="absolute bottom-0 left-0 h-[2px] bg-amber-900/60"
@@ -343,18 +343,12 @@ export default function WizardDiary() {
   const paperStyle = {
     backgroundColor: '#d8c3a5', // Darker, more aged ivory base
     backgroundImage: `
-      radial-gradient(ellipse at center, transparent 40%, rgba(101, 67, 33, 0.5) 90%, rgba(62, 39, 35, 0.8) 100%),
-      radial-gradient(circle at 15% 25%, rgba(92, 58, 33, 0.25) 0%, transparent 15%),
-      radial-gradient(circle at 80% 85%, rgba(101, 67, 33, 0.2) 0%, transparent 20%),
-      radial-gradient(circle at 35% 80%, rgba(92, 58, 33, 0.15) 0%, transparent 10%),
-      radial-gradient(circle at 75% 15%, rgba(62, 39, 35, 0.18) 0%, transparent 12%),
-      linear-gradient(100deg, transparent 40%, rgba(255, 255, 255, 0.15) 41%, rgba(62, 39, 35, 0.08) 42%, transparent 44%),
-      linear-gradient(135deg, transparent 30%, rgba(62, 39, 35, 0.06) 32%, transparent 34%),
-      linear-gradient(45deg, transparent 70%, rgba(62, 39, 35, 0.05) 71%, transparent 73%),
-      url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.12'/%3E%3C/svg%3E")
-    `,
-    backgroundBlendMode: 'multiply, multiply, multiply, multiply, multiply, overlay, multiply, multiply, color-burn',
-    backgroundSize: '100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 200px 200px'
+      radial-gradient(ellipse at center, transparent 40%, rgba(101, 67, 33, 0.2) 90%, rgba(62, 39, 35, 0.4) 100%),
+      radial-gradient(circle at 15% 25%, rgba(92, 58, 33, 0.15) 0%, transparent 15%),
+      radial-gradient(circle at 80% 85%, rgba(101, 67, 33, 0.1) 0%, transparent 20%),
+      linear-gradient(100deg, transparent 40%, rgba(255, 255, 255, 0.15) 41%, rgba(62, 39, 35, 0.05) 42%, transparent 44%)
+    `
+    // Removed expensive backgroundBlendMode and SVG feTurbulence noise to fix mobile typing lag
   };
 
   const containerClasses = `relative w-[95vw] sm:w-[92vw] max-h-[90vh] rounded-xl shadow-[0_40px_100px_rgba(0,0,0,1)] overflow-hidden flex flex-row z-10 mx-auto transition-all duration-[1200ms] ease-in-out ${
@@ -375,13 +369,11 @@ export default function WizardDiary() {
         .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
       `}</style>
 
-      {/* Magical ambient background glow */}
-      <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-900/10 via-transparent to-transparent opacity-50 pointer-events-none blur-3xl transition-opacity duration-1000 ${isOpen ? 'opacity-80' : 'opacity-40'}`}></div>
+      {/* Magical ambient background glow (removed expensive blur-3xl for mobile performance) */}
+      <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-900/10 via-transparent to-transparent opacity-50 pointer-events-none transition-opacity duration-1000 ${isOpen ? 'opacity-80' : 'opacity-40'}`}></div>
 
       {/* Main Container */}
-      <motion.div
-        animate={{ y: [0, -8, 0] }}
-        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+      <div
         className={containerClasses}
         style={{
           boxShadow: "inset 0 0 100px rgba(92, 58, 33, 0.5), inset 0 0 30px rgba(58, 30, 10, 0.6), 0 40px 80px -20px rgba(0,0,0,1)",
@@ -473,7 +465,7 @@ export default function WizardDiary() {
             )}
           </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }
