@@ -23,7 +23,7 @@ const fetchWizardResponse = async (prompt) => {
       'Authorization': `Bearer ${API_KEY}`
     },
     body: JSON.stringify({
-      model: "llama-3.1-8b-instant",
+      model: "openai/gpt-oss-20b",
       messages: [
         { role: "system", content: "Act as an ancient, sentient wizard trapped inside a magical diary. Provide highly accurate, factual, and correct answers to the user's questions. You may use a slightly mystical tone, but never sacrifice factual correctness or hide behind riddles. Keep responses short and direct (maximum 2-3 sentences)." },
         { role: "user", content: prompt }

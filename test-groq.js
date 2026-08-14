@@ -10,7 +10,7 @@ async function test() {
       'Authorization': `Bearer ${API_KEY}`
     },
     body: JSON.stringify({
-      model: "llama-3.1-8b-instant",
+      model: "openai/gpt-oss-20b",
       messages: [
         { role: "system", content: "Provide highly accurate, factual, and correct answers. Keep responses short and direct (maximum 2-3 sentences)." },
         { role: "user", content: "Hello" }

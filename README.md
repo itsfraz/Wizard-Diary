@@ -17,7 +17,7 @@
 
 - **📖 Magical UI**: A beautifully crafted ancient diary interface with leather binding, parchment textures, and magical glows.
 - **🪄 Spellbinding Animations**: Smooth vanishing text, typing effects, and ambient glows powered by `framer-motion`.
-- **⚡ Lightning Fast AI**: Integrated with the **Groq API** (`llama-3.1-8b-instant`) for incredibly fast and highly accurate responses.
+- **⚡ Lightning Fast AI**: Integrated with the **Groq API** (`gpt-oss-20b`) for incredibly fast and highly accurate responses.
 - **🌗 Dual Modes**: Seamlessly toggle between the immersive "Book" view and a focused "Single" minimalistic view.
 
 ## 🚀 Getting Started
